@@ -2,33 +2,24 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
 
-	"github.com/gofiber/fiber/v2"
-
-	"github.com/Zeta-Manu/manu-auth/internal/config"
-	"github.com/Zeta-Manu/manu-auth/internal/infrastructure/healthcheck"
-	"github.com/Zeta-Manu/manu-auth/internal/routes"
-	"github.com/Zeta-Manu/manu-auth/internal/service"
+	"github.com/Zeta-Manu/manu-auth/config"
+	"github.com/Zeta-Manu/manu-auth/internal/application"
 )
 
 func main() {
-	appConfig, err := config.InitConfig("internal/config/config.json")
+	cwd, _ := os.Getwd()
+	filePath := filepath.Join(cwd, "config", "config.yaml")
+	fmt.Println(filePath)
+
+	appConfig, err := config.LoadConfig(filePath)
 	if err != nil {
-		fmt.Println("Error initializing configuration: ", err)
-		return
+		log.Print("error")
 	}
 
-	app := fiber.New()
-
-	userService, err := service.NewUserService(appConfig)
-	if err != nil {
-		fmt.Println("Error creating UserService: ", err)
-		return
-	}
-
-	// Register routes
-	healthcheck.RegisterRoutes(app)
-	routes.RegisterUserRoutes(app, userService)
-
-	app.Listen(":3000")
+	fmt.Println(appConfig.AuthService.HTTP.Port)
+	application.NewApplication(*appConfig)
 }

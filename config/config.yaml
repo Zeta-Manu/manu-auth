@@ -1,0 +1,14 @@
+---
+# Configuration for the auth-service
+authService:
+  http:
+    port: 8080
+  aws:
+    access_key: ""
+    secret_access_key: ""
+  cognito:
+    region: ""
+    user_pool_id: ""
+    client_id: ""
+  jwt:
+    public_key: ""
