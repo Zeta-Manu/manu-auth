@@ -45,7 +45,7 @@ func NewApplication(cfg config.Config) {
 		Logger: logger,
 	}
 
-	route.InitRoutes(r, *idpAdapter)
+	route.InitRoutes(r, *idpAdapter, cfg.AuthService.JWT.PublicKey)
 
 	startServer(cfg, router, logger)
 }

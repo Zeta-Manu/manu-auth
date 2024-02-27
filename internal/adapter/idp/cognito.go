@@ -2,8 +2,6 @@ package idp
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -12,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
 
 	"github.com/Zeta-Manu/manu-auth/internal/domain/entity"
-	"github.com/Zeta-Manu/manu-auth/pkg/utils"
 )
 
 type CognitoAdapter struct {
@@ -58,32 +55,7 @@ func (a *CognitoAdapter) Register(ctx context.Context, userRegistration entity.U
 
 	result, err := a.client.SignUp(ctx, params)
 	if err != nil {
-		var invalidPasswordErr *types.InvalidPasswordException
-		var invalidParameterErr *types.InvalidParameterException
-		var usernameExistsErr *types.UsernameExistsException
-
-		switch {
-		case errors.As(err, &invalidPasswordErr):
-			return "", &utils.CustomError{
-				Message: "Invalid password",
-				Status:  http.StatusBadRequest,
-			}
-		case errors.As(err, &invalidParameterErr):
-			return "", &utils.CustomError{
-				Message: "Invalid parameter",
-				Status:  http.StatusBadRequest,
-			}
-		case errors.As(err, &usernameExistsErr):
-			return "", &utils.CustomError{
-				Message: "Username already exists",
-				Status:  http.StatusConflict,
-			}
-		default:
-			return "", &utils.CustomError{
-				Message: "Failed to sign up user",
-				Status:  http.StatusInternalServerError,
-			}
-		}
+		return "", handleCognitoError(err)
 	}
 	return *result.CodeDeliveryDetails.Destination, nil
 }
@@ -100,10 +72,7 @@ func (a *CognitoAdapter) Login(ctx context.Context, userLogin entity.UserLogin) 
 
 	result, err := a.client.InitiateAuth(ctx, params)
 	if err != nil {
-		return nil, &utils.CustomError{
-			Message: "Failed to initate auth",
-			Status:  http.StatusInternalServerError,
-		}
+		return nil, handleCognitoError(err)
 	}
 
 	loginReturn := entity.LoginResult{
@@ -126,44 +95,35 @@ func (a *CognitoAdapter) ConfirmRegistration(ctx context.Context, userRegistrati
 
 	_, err := a.client.ConfirmSignUp(ctx, params)
 	if err != nil {
-		return &utils.CustomError{
-			Message: "Failed to confirm sign up",
-			Status:  http.StatusInternalServerError,
-		}
+		return handleCognitoError(err)
 	}
 
 	return nil
 }
 
-func (a *CognitoAdapter) ResendConfirmationCode(ctx context.Context, email entity.Email) (string, error) {
+func (a *CognitoAdapter) ResendConfirmationCode(ctx context.Context, email string) (string, error) {
 	params := &cip.ResendConfirmationCodeInput{
 		ClientId: aws.String(a.clientID),
-		Username: aws.String(email.Email),
+		Username: aws.String(email),
 	}
 
 	result, err := a.client.ResendConfirmationCode(ctx, params)
 	if err != nil {
-		return "", &utils.CustomError{
-			Message: "Failed to resend confirmation code",
-			Status:  http.StatusInternalServerError,
-		}
+		return "", handleCognitoError(err)
 	}
 
 	return *result.CodeDeliveryDetails.Destination, nil
 }
 
-func (a *CognitoAdapter) ForgotPassword(ctx context.Context, email entity.Email) (string, error) {
+func (a *CognitoAdapter) ForgotPassword(ctx context.Context, email string) (string, error) {
 	params := &cip.ForgotPasswordInput{
 		ClientId: aws.String(a.clientID),
-		Username: aws.String(email.Email),
+		Username: aws.String(email),
 	}
 
 	result, err := a.client.ForgotPassword(ctx, params)
 	if err != nil {
-		return "", &utils.CustomError{
-			Message: "Failed to initiate forgot password",
-			Status:  http.StatusInternalServerError,
-		}
+		return "", handleCognitoError(err)
 	}
 
 	return *result.CodeDeliveryDetails.Destination, nil
@@ -179,10 +139,7 @@ func (a *CognitoAdapter) ConfirmForgotPassword(ctx context.Context, userResetPas
 
 	_, err := a.client.ConfirmForgotPassword(ctx, params)
 	if err != nil {
-		return &utils.CustomError{
-			Message: "Failed to confirm forgot password",
-			Status:  http.StatusInternalServerError,
-		}
+		return handleCognitoError(err)
 	}
 
 	return nil
@@ -197,10 +154,7 @@ func (a *CognitoAdapter) ChangePassword(ctx context.Context, accessToken string,
 
 	_, err := a.client.ChangePassword(ctx, params)
 	if err != nil {
-		return &utils.CustomError{
-			Message: "Failed to change password",
-			Status:  http.StatusInternalServerError,
-		}
+		return handleCognitoError(err)
 	}
 
 	return nil
