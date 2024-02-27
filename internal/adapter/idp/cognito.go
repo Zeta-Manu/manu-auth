@@ -2,7 +2,8 @@ package idp
 
 import (
 	"context"
-	"fmt"
+	"errors"
+	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -11,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
 
 	"github.com/Zeta-Manu/manu-auth/internal/domain/entity"
+	"github.com/Zeta-Manu/manu-auth/pkg/utils"
 )
 
 type CognitoAdapter struct {
@@ -56,8 +58,32 @@ func (a *CognitoAdapter) Register(ctx context.Context, userRegistration entity.U
 
 	result, err := a.client.SignUp(ctx, input)
 	if err != nil {
-		return nil, fmt.Errorf("failed to sign up user: %w", err)
-	}
+		var invalidPasswordErr *types.InvalidPasswordException
+		var invalidParameterErr *types.InvalidParameterException
+		var usernameExistsErr *types.UsernameExistsException
 
+		switch {
+		case errors.As(err, &invalidPasswordErr):
+			return nil, &utils.CustomError{
+				Message: "Invalid password",
+				Status:  http.StatusBadRequest,
+			}
+		case errors.As(err, &invalidParameterErr):
+			return nil, &utils.CustomError{
+				Message: "Invalid parameter",
+				Status:  http.StatusBadRequest,
+			}
+		case errors.As(err, &usernameExistsErr):
+			return nil, &utils.CustomError{
+				Message: "Username already exists",
+				Status:  http.StatusConflict,
+			}
+		default:
+			return nil, &utils.CustomError{
+				Message: "Failed to sign up user",
+				Status:  http.StatusInternalServerError,
+			}
+		}
+	}
 	return result.CodeDeliveryDetails, nil
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/Zeta-Manu/manu-auth/config"
 	"github.com/Zeta-Manu/manu-auth/internal/adapter/idp"
 	"github.com/Zeta-Manu/manu-auth/internal/api/route"
+	"github.com/Zeta-Manu/manu-auth/pkg/utils"
 )
 
 func NewApplication(cfg config.Config) {
@@ -38,7 +39,13 @@ func NewApplication(cfg config.Config) {
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "healthy"})
 	})
-	route.InitRoutes(router, *idpAdapter)
+
+	r := utils.RouterWithLogger{
+		Router: router,
+		Logger: logger,
+	}
+
+	route.InitRoutes(r, *idpAdapter)
 
 	startServer(cfg, router, logger)
 }
