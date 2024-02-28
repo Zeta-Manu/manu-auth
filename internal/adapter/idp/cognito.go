@@ -101,7 +101,7 @@ func (a *CognitoAdapter) ConfirmRegistration(ctx context.Context, userRegistrati
 	return nil
 }
 
-func (a *CognitoAdapter) ResendConfirmationCode(ctx context.Context, email string) (string, error) {
+func (a *CognitoAdapter) ResendConfirmationCode(ctx context.Context, email string) (*entity.Email, error) {
 	params := &cip.ResendConfirmationCodeInput{
 		ClientId: aws.String(a.clientID),
 		Username: aws.String(email),
@@ -109,13 +109,13 @@ func (a *CognitoAdapter) ResendConfirmationCode(ctx context.Context, email strin
 
 	result, err := a.client.ResendConfirmationCode(ctx, params)
 	if err != nil {
-		return "", handleCognitoError(err)
+		return nil, handleCognitoError(err)
 	}
 
-	return *result.CodeDeliveryDetails.Destination, nil
+	return &entity.Email{Email: *result.CodeDeliveryDetails.Destination}, nil
 }
 
-func (a *CognitoAdapter) ForgotPassword(ctx context.Context, email string) (string, error) {
+func (a *CognitoAdapter) ForgotPassword(ctx context.Context, email string) (*entity.Email, error) {
 	params := &cip.ForgotPasswordInput{
 		ClientId: aws.String(a.clientID),
 		Username: aws.String(email),
@@ -123,10 +123,10 @@ func (a *CognitoAdapter) ForgotPassword(ctx context.Context, email string) (stri
 
 	result, err := a.client.ForgotPassword(ctx, params)
 	if err != nil {
-		return "", handleCognitoError(err)
+		return nil, handleCognitoError(err)
 	}
 
-	return *result.CodeDeliveryDetails.Destination, nil
+	return &entity.Email{Email: *result.CodeDeliveryDetails.Destination}, nil
 }
 
 func (a *CognitoAdapter) ConfirmForgotPassword(ctx context.Context, userResetPassword entity.UserResetPassword) error {
