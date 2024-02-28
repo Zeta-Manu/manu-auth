@@ -10,4 +10,5 @@ FROM alpine:3.19.1
 
 WORKDIR /app
 COPY --from=build /app/manu-auth .
+EXPOSE 8080
 CMD ["/app/manu-auth"]
