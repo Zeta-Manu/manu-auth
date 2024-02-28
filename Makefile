@@ -7,5 +7,5 @@ tidy:
 vendor:
 	go mod vendor
 
-docker:build:
+docker-build:
 	docker build --tag manu-auth .

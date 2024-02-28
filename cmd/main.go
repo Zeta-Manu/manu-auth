@@ -20,6 +20,5 @@ func main() {
 		log.Print("error")
 	}
 
-	fmt.Println(appConfig.AuthService.HTTP.Port)
 	application.NewApplication(*appConfig)
 }
