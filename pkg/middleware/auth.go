@@ -30,20 +30,36 @@ func AuthenticationMiddleware(jwtPublicKey string) gin.HandlerFunc {
 		}
 
 		// Verify the Token
-		validtoken, err := verifyToken(token, keySet)
+		validToken, err := verifyToken(token, keySet)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Token"})
 			c.Abort()
 			return
 		}
 
-		if !validtoken.Valid {
+		if !validToken.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Token"})
 			c.Abort()
 			return
 		}
 
+		// Extract the subject (sub) claim from the token
+		claims, ok := validToken.Claims.(jwt.MapClaims)
+		if !ok || !validToken.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Token"})
+			c.Abort()
+			return
+		}
+
+		sub, ok := claims["sub"].(string)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Token: Subject not found"})
+			c.Abort()
+			return
+		}
+
 		c.Set("token", token)
+		c.Set("sub", sub)
 		c.Next()
 	}
 }

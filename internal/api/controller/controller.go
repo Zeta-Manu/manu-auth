@@ -207,3 +207,12 @@ func (uc *UserController) ChangePassword(c *gin.Context) {
 
 	c.Status(http.StatusOK)
 }
+
+func GetSub(c *gin.Context) {
+	sub, exists := c.Get("sub")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Subject not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": sub})
+}

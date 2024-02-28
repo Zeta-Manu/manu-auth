@@ -20,5 +20,6 @@ func InitRoutes(router utils.RouterWithLogger, idpAdapter idp.CognitoAdapter, jw
 		user.POST("/confirm-forgot", userController.ConfirmForgotPassword)
 		// route with middleware
 		user.POST("/password", middleware.AuthenticationMiddleware(jwtPublicKey), userController.ChangePassword)
+		user.GET("/sub", middleware.AuthenticationMiddleware(jwtPublicKey), controller.GetSub)
 	}
 }
