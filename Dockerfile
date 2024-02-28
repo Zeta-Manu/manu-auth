@@ -3,13 +3,14 @@ FROM golang:1.20.14-alpine3.19 AS build
 
 WORKDIR /app
 COPY . .
-RUN go build -o manu-auth ./cmd/main.go
+RUN go build -o manu-auth cmd/main.go
 
 # Run Stage
 FROM alpine:3.19.1
 
 WORKDIR /app
 COPY --from=build /app/manu-auth .
+COPY --from=build /app/config/config.yaml /app/config/.
 EXPOSE 8080
 
 # Set GIN_MODE to release

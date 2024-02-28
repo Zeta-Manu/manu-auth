@@ -61,6 +61,7 @@ func startServer(cfg config.Config, handler http.Handler, logger *zap.Logger) {
 			logger.Fatal("Failed to Start Server", zap.Error(err))
 		}
 	}()
+	logger.Info("Starting Server ...")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
