@@ -38,6 +38,20 @@ func LoadConfig(filePath string) (*Config, error) {
 		return nil, fmt.Errorf("error reading config file: %v", err)
 	}
 
+	// Automatically read environment variables
+	viper.AutomaticEnv()
+
+	viper.SetEnvPrefix("APP")
+
+	// Bind specific environment variables to struct fields
+	viper.BindEnv("AuthService.HTTP.Port", "APP_HTTP_PORT")
+	viper.BindEnv("AuthServuce.AWS.AccessKey", "APP_AWS_ACCESS_KEY")
+	viper.BindEnv("AuthService.AWS.SecretAccessKey", "APP_AWS_SECRET_ACCESS_KEY")
+	viper.BindEnv("AuthService.Cognito.Region", "APP_COGNITO_REGION")
+	viper.BindEnv("AuthService.Cognito.UserPoolId", "APP_COGNITO_USER_POOL_ID")
+	viper.BindEnv("AuthService.Cognito.ClientId", "APP_COGNITO_CLIENT_ID")
+	viper.BindEnv("AuthService.JWT.PublicKey", "APP_JWT_PUBLIC_KEY")
+
 	// Unmarshal the config file into the Config struct
 	if err := viper.Unmarshal(&config); err != nil {
 		return nil, fmt.Errorf("unable to decode into struct: %v", err)
