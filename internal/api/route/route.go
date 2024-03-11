@@ -10,7 +10,7 @@ import (
 func InitRoutes(router utils.RouterWithLogger, idpAdapter idp.CognitoAdapter, jwtPublicKey string) {
 	userController := controller.NewUserController(idpAdapter, router.Logger)
 	//
-	user := router.Router.Group("/api/v2/user")
+	user := router.Router.Group("/api/v2")
 	{
 		user.POST("/signup", userController.SignUp)
 		user.POST("/confirm", userController.ConfirmSignUp)

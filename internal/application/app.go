@@ -12,9 +12,12 @@ import (
 	"github.com/gin-contrib/cors"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
 
 	"github.com/Zeta-Manu/manu-auth/config"
+	docs "github.com/Zeta-Manu/manu-auth/docs"
 	"github.com/Zeta-Manu/manu-auth/internal/adapter/idp"
 	"github.com/Zeta-Manu/manu-auth/internal/api/route"
 	"github.com/Zeta-Manu/manu-auth/pkg/utils"
@@ -45,7 +48,10 @@ func NewApplication(cfg config.Config) {
 		Logger: logger,
 	}
 
+	docs.SwaggerInfo.BasePath = "/api/v2"
+
 	route.InitRoutes(r, *idpAdapter, cfg.AuthService.JWT.PublicKey)
+	r.Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	startServer(cfg, router, logger)
 }

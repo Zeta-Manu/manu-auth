@@ -24,6 +24,17 @@ func NewUserController(idpAdapter idp.CognitoAdapter, logger *zap.Logger) *UserC
 	}
 }
 
+// @Summary		Sign up a new user
+// @Description	Register a new user with email and password
+// @Tags User
+// @Accept			json
+// @Produce		json
+// @Param			body	body		entity.UserRegistration											true	"User registration info"
+// @Success 200 {object} entity.ResponseWrapper
+// @Failure 400 {object} entity.ErrorWrapper "Invalid Password or Invalid Parameter"
+// @Failure 409 {object} entity.ErrorWrapper "Username Exists"
+// @Failure 500 {object} entity.ErrorWrapper
+// @Router			/signup [post]
 func (uc *UserController) SignUp(c *gin.Context) {
 	var userRegistration entity.UserRegistration
 	if err := c.ShouldBindJSON(&userRegistration); err != nil {
@@ -52,6 +63,16 @@ func (uc *UserController) SignUp(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// @Summary Confirm user registration
+// @Description Confirm a user's registration using the provided confirmation information
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param body body entity.UserRegistrationConfirm true "User registration confirmation info"
+// @Success 200
+// @Failure 400
+// @Failure 408
+// @Router /confirm [post]
 func (uc *UserController) ConfirmSignUp(c *gin.Context) {
 	var userRegistrationConfirm entity.UserRegistrationConfirm
 	if err := c.ShouldBindJSON(&userRegistrationConfirm); err != nil {
@@ -76,6 +97,15 @@ func (uc *UserController) ConfirmSignUp(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// @Summary Resend confirmation code
+// @Description Resend the confirmation code to the provided email address
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param email body entity.Email true "Email address to resend the confirmation code to"
+// @Success 200 {object} entity.ResponseWrapper
+// @Failure 500 {object} entity.ErrorWrapper
+// @Router /resend-confirm [post]
 func (uc *UserController) ResendConfirmationCode(c *gin.Context) {
 	var email entity.Email
 	result, err := uc.idpAdapter.ResendConfirmationCode(c, email.Email)
@@ -99,6 +129,19 @@ func (uc *UserController) ResendConfirmationCode(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// @Summary		Log in with email and password
+// @Description	Authenticate user with email and password
+// @Tags User
+// @Accept			json
+// @Produce		json
+// @Param			body	body		entity.UserLogin									true	"User login info"
+// @Success 200 {object} entity.ResponseWrapper{data=entity.LoginResult}
+// @Failure 400 {object} entity.ErrorWrapper "Invalid Password or Missing Parameter"
+// @Failure 401 {object} entity.ErrorWrapper "Not Authorized"
+// @Failure 403 {object} entity.ErrorWrapper "User Not Confirm"
+// @Failure 404 {object} entity.ErrorWrapper "User Not Found"
+// @Failure 500 {object} entity.ErrorWrapper
+// @Router			/login [post]
 func (uc *UserController) LogIn(c *gin.Context) {
 	var userLogin entity.UserLogin
 	if err := c.ShouldBindJSON(&userLogin); err != nil {
@@ -126,6 +169,16 @@ func (uc *UserController) LogIn(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// @Summary Forgot Password
+// @Description Initiate the password reset process for a user by sending a reset link to their email
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param email body entity.Email true "Email address of the user"
+// @Success 200 {object} entity.ResponseWrapper
+// @Failure 400 {object} entity.ErrorWrapper
+// @Failure 500 {object} entity.ErrorWrapper
+// @Router /forgot-password [post]
 func (uc *UserController) ForgotPassword(c *gin.Context) {
 	var email entity.Email
 	if err := c.ShouldBindJSON(&email); err != nil {
@@ -154,6 +207,16 @@ func (uc *UserController) ForgotPassword(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// @Summary Forgot Password
+// @Description Initiate the password reset process for a user by sending a reset link to their email
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param email body entity.UserResetPassword true "Email address of the user"
+// @Success 200 {object} entity.ResponseWrapper
+// @Failure 400 {object} entity.ErrorWrapper
+// @Failure 500 {object} entity.ErrorWrapper
+// @Router /confirm-forgot [post]
 func (uc *UserController) ConfirmForgotPassword(c *gin.Context) {
 	var userResetPassword entity.UserResetPassword
 	if err := c.ShouldBindJSON(&userResetPassword); err != nil {
@@ -178,6 +241,19 @@ func (uc *UserController) ConfirmForgotPassword(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// @Summary Change user password
+// @Description Change the password for the authenticated user
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer {token}"
+// @Param body body entity.UserChangePassword true "User change password info"
+// @Success  200
+// @Failure  400 {object} entity.ErrorWrapper
+// @Failure  401 {object} entity.ErrorWrapper "Not Authorized"
+// @Failure  500 {object} entity.ErrorWrapper
+// @Security BearerAuth
+// @Router /change-password [post]
 func (uc *UserController) ChangePassword(c *gin.Context) {
 	var userChangePassword entity.UserChangePassword
 	if err := c.ShouldBindJSON(&userChangePassword); err != nil {
@@ -208,6 +284,16 @@ func (uc *UserController) ChangePassword(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// @Summary Change user password
+// @Description Change the password for the authenticated user
+// @Tags User
+// @Produce json
+// @Param Authorization header string true "Bearer {token}"
+// @Success 200 {object} entity.ResponseWrapper
+// @Failure 401 {object} entity.ErrorWrapper "Not Authorized"
+// @Failure 500 {object} entity.ErrorWrapper
+// @Security BearerAuth
+// @Router /sub [get]
 func GetSub(c *gin.Context) {
 	sub, exists := c.Get("sub")
 	if !exists {

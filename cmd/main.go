@@ -10,6 +10,12 @@ import (
 	"github.com/Zeta-Manu/manu-auth/internal/application"
 )
 
+// @title Manu Swagger API
+// @version 1.0
+// @description server
+
+// @host localhost:8080
+// @BasePath /api/v2
 func main() {
 	cwd, _ := os.Getwd()
 	filePath := filepath.Join(cwd, "config", "config.yaml")

@@ -7,5 +7,8 @@ tidy:
 vendor:
 	go mod vendor
 
+swag:
+	swag init -g cmd/main.go
+
 docker-build:
 	docker build --tag manu-auth .
