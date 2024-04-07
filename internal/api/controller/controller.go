@@ -288,11 +288,10 @@ func (uc *UserController) ChangePassword(c *gin.Context) {
 // @Description Change the password for the authenticated user
 // @Tags User
 // @Produce json
-// @Param Authorization header string true "Bearer {token}"
+// @Param Authorization header string true "Bearer {token}" default(Bearer <Add access token here>)
 // @Success 200 {object} entity.ResponseWrapper
 // @Failure 401 {object} entity.ErrorWrapper "Not Authorized"
 // @Failure 500 {object} entity.ErrorWrapper
-// @Security BearerAuth
 // @Router /sub [get]
 func GetSub(c *gin.Context) {
 	sub, exists := c.Get("sub")

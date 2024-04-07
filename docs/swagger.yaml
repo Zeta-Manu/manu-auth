@@ -308,7 +308,8 @@ paths:
     get:
       description: Change the password for the authenticated user
       parameters:
-      - description: Bearer {token}
+      - default: Bearer <Add access token here>
+        description: Bearer {token}
         in: header
         name: Authorization
         required: true
@@ -328,8 +329,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/entity.ErrorWrapper'
-      security:
-      - BearerAuth: []
       summary: Change user password
       tags:
       - User

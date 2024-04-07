@@ -375,11 +375,6 @@ const docTemplate = `{
         },
         "/sub": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Change the password for the authenticated user",
                 "produces": [
                     "application/json"
@@ -391,6 +386,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
                         "description": "Bearer {token}",
                         "name": "Authorization",
                         "in": "header",
